@@ -4,14 +4,20 @@ const Header = (parameters) => {
   )
 }
 
+const Part = (parameters) => {
+  return (
+    <p>{parameters.part} {parameters.exercise}</p>
+  )
+}
+
 const Content = (parameters) => {
   let parts = parameters.part.split(' | ');
   let exercises = parameters.exercise.split(' | ');
 
   return (
     <>
-      {parts.map((p, i) => (
-        <p key={i}>{p} {exercises[i]}</p>
+      {parts.map((part, index) => (
+        <Part part={part} exercise={exercises[index]}/>
       ))}
     </>
   )
