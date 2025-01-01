@@ -23,7 +23,7 @@ const Content = (parameters) => {
 
 const Total = (parameters) => {
   return (
-    <p>Number of exercises {parameters.sum}</p>
+    <p>Number of exercises {parameters.parts[0]['exercises'] + parameters.parts[1]['exercises'] + parameters.parts[2]['exercises']}</p>
   )
 }
 
@@ -49,8 +49,7 @@ const App = () => {
     <div>
       <Header course={course}/>
       <Content part={parts}/>
-
-      <Total sum={parts[0]['exercises'] + parts[1]['exercises'] + parts[2]['exercises']}/>
+      <Total parts={parts}/>
     </div>
   )
 }
