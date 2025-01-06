@@ -9,6 +9,13 @@ const Header = ({displayText}) => (
 const Statistics = ({good, neutral, bad}) => {
   const sum = good + neutral + bad
 
+  if (sum == 0){
+    return (
+      <div>
+        No feedback given        
+      </div>
+    )
+  }
   return (
     <div>
       <div>good {good}</div>
