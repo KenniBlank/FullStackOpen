@@ -6,6 +6,12 @@ const Header = ({displayText}) => (
   </h2>
 )
 
+const Button = (props) => {
+  return (
+    <button onClick={props.onClickFunction}>{props.text}</button>
+  )
+}
+
 const Statistics = ({good, neutral, bad}) => {
   const sum = good + neutral + bad
 
@@ -18,13 +24,28 @@ const Statistics = ({good, neutral, bad}) => {
   }
   return (
     <div>
-      <div>good {good}</div>
-      <div>neutral {neutral}</div>
-      <div>bad {bad}</div>
+      <StatisticsLine text="good" value={good} />
+      <StatisticsLine text="neutral" value={neutral} />
+      <StatisticsLine text="bad" value={bad} />
+      <StatisticsLine text="all" value={sum} />
+      <StatisticsLine text="average" value={((good - bad) / sum)} />
+      <StatisticsLine text="positive" value={(good / sum) * 100}/>
+    </div>
+  )
+}
 
-      <div>all {sum}</div>
-      <div>average {((good - bad) / sum) * 100}</div>
-      <div>positive {(good / sum) * 100} %</div>
+const StatisticsLine = (props) => {
+  if (props.text == "positive") {
+    return (
+      <div>
+        {props.text} {props.value} %
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {props.text} {props.value}    
     </div>
   )
 }
@@ -38,9 +59,11 @@ const App = () => {
   return (
     <div>
       <Header displayText="give feedback"/>
-      <button onClick={() => setGood(good + 1)}>good</button>
-      <button onClick={() => setNeutral(neutral + 1)}>neutral</button>
-      <button onClick={() => setBad(bad + 1)}>bad</button>
+
+
+      <Button onClickFunction={() => setGood(good + 1)} text="good" />
+      <Button onClickFunction={() => setNeutral(neutral + 1)} text="neutral" />
+      <Button onClickFunction={() => setBad(bad + 1)} text="bad" />
 
       <Header displayText="statistics"/>
       <Statistics good={good} bad={bad} neutral={neutral}/>
