@@ -1,5 +1,12 @@
 import { useState } from 'react'
 
+const Header = ({text}) => (
+  <h1>
+    {text}
+  </h1>
+)
+
+
 const App = () => {
   const anecdotes = [
     'If it hurts, do it more often.',
@@ -11,31 +18,56 @@ const App = () => {
     'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.',
     'The only way to go fast, is to go well.'
   ]
-   
+
+  const anecdoteLength = anecdotes.length;
+  
   const [selected, setSelected] = useState(0)
-  const [votes, setVote] = useState(Array(anecdotes.length).fill(0))
-  console.log(votes)
+  const [mostVoted, setMostVoted] = useState(0)
+  const [votes, setVote] = useState(Array(anecdoteLength).fill(0))
+  
+  const mostVotedAnecdote = () => {
+    let index = 0;
+    for (let i = 0; i < anecdoteLength; i++){
+      if (votes[i] > votes[index]){
+        index = i
+      }
+    }
+
+    console.log(index)
+    setMostVoted(index)
+  }
 
   const randomizeAnecdote = () => () => {
-    setSelected(Math.floor(Math.random() * anecdotes.length))
+    setSelected(Math.floor(Math.random() * anecdoteLength))
   }
 
   const voteForAnecdote = (index) => () => {
     const voteCopy = {...votes}
     voteCopy[index] += 1
     setVote(voteCopy)
+
+    mostVotedAnecdote()
   }
 
   return (
     <>
-      <div>
+      <>
+        <Header text="Anecdote of the day" />
         {anecdotes[selected]}
-      </div>
-      <div>
-        has {votes[selected]} votes
-      </div>
-      <button onClick={voteForAnecdote(selected)}>vote</button>
-      <button onClick={randomizeAnecdote()}>next anecdote</button>
+        <div>
+          has {votes[selected]} votes
+        </div>
+        <button onClick={voteForAnecdote(selected)}>vote</button>
+        <button onClick={randomizeAnecdote()}>next anecdote</button>
+      </>
+
+      <>
+        <Header text="Anecdote with most votes" />
+        {anecdotes[mostVoted]}
+        <div>
+          has {votes[mostVoted]} votes
+        </div>
+      </>
     </>
   )
 }
