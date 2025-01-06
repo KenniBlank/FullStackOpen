@@ -6,11 +6,21 @@ const Header = ({displayText}) => (
   </h2>
 )
 
-const Statistics = ({displayText, value}) => (
-  <div>
-    {displayText} {value}
-  </div>
-)
+const Statistics = ({good, neutral, bad}) => {
+  const sum = good + neutral + bad
+
+  return (
+    <div>
+      <div>good {good}</div>
+      <div>neutral {neutral}</div>
+      <div>bad {bad}</div>
+
+      <div>all {sum}</div>
+      <div>average {((good - bad) / sum) * 100}</div>
+      <div>positive {(good / sum) * 100} %</div>
+    </div>
+  )
+}
 
 const App = () => {
   // save clicks of each button to its own state
@@ -26,14 +36,7 @@ const App = () => {
       <button onClick={() => setBad(bad + 1)}>bad</button>
 
       <Header displayText="statistics"/>
-      <Statistics displayText="good" value={good}/>
-      <Statistics displayText="neutral" value={neutral}/>
-      <Statistics displayText="bad" value={bad}/>
-
-      {/* More Statistics */}
-      <Statistics displayText="all" value={good + bad + neutral}/>
-      <Statistics displayText="average" value={(good - bad) / (good + bad + neutral)}/>
-      <Statistics displayText="positive" value={good / (good + neutral + bad) * 100} />
+      <Statistics good={good} bad={bad} neutral={neutral}/>
     </div>
   )
 }
