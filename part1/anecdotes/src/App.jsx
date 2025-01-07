@@ -6,6 +6,23 @@ const Header = ({text}) => (
   </h1>
 )
 
+const MostVotedAnecdotes = ({anecdoteLength, anecdotes, votes}) => {
+  let mostVoted = 0
+    for (let i = 1; i < anecdoteLength; i++){
+      if(votes[i] > votes[mostVoted]){
+        mostVoted = i
+      } 
+    }
+    return (
+      <>
+        {anecdotes[mostVoted]}
+        <div>
+          has {votes[mostVoted]} votes
+        </div>
+      </>
+    )
+}
+
 
 const App = () => {
   const anecdotes = [
@@ -22,20 +39,7 @@ const App = () => {
   const anecdoteLength = anecdotes.length;
   
   const [selected, setSelected] = useState(0)
-  const [mostVoted, setMostVoted] = useState(0)
   const [votes, setVote] = useState(Array(anecdoteLength).fill(0))
-  
-  const mostVotedAnecdote = () => {
-    let index = 0;
-    for (let i = 0; i < anecdoteLength; i++){
-      if (votes[i] > votes[index]){
-        index = i
-      }
-    }
-
-    console.log(index)
-    setMostVoted(index)
-  }
 
   const randomizeAnecdote = () => () => {
     setSelected(Math.floor(Math.random() * anecdoteLength))
@@ -45,8 +49,6 @@ const App = () => {
     const voteCopy = {...votes}
     voteCopy[index] += 1
     setVote(voteCopy)
-
-    mostVotedAnecdote()
   }
 
   return (
@@ -63,10 +65,7 @@ const App = () => {
 
       <>
         <Header text="Anecdote with most votes" />
-        {anecdotes[mostVoted]}
-        <div>
-          has {votes[mostVoted]} votes
-        </div>
+        <MostVotedAnecdotes anecdoteLength={anecdoteLength} anecdotes={anecdotes} votes = {votes}/>
       </>
     </>
   )
