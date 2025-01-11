@@ -21,7 +21,13 @@ const App = () => {
     const newPerson = {
       name: newName
     }
-    setPersons([...persons, newPerson])
+    const result = persons.filter((person) => JSON.stringify(person) === JSON.stringify(newPerson))
+
+    if (result.length > 0) {
+      alert (`${newName} is already added to phonebook`)
+    } else if (result.length == 0) {
+      setPersons([...persons, newPerson])
+    }
   }
 
   return (
@@ -31,7 +37,7 @@ const App = () => {
         <div>
           name: <input value={newName} onChange={(e) => setNewName(e.target.value)}/>
         </div>
-        <div>Debug: {newName}</div>
+
         <div>
           <button type="submit" onClick={addPerson}>add</button>
         </div>
