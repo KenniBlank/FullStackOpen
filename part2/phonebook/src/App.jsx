@@ -4,7 +4,7 @@ const DisplayPersonDetails = ({persons}) => {
   return (
     <div>
     {
-      persons.map((personDetail) => <div key={personDetail.name}>{personDetail.name}</div>)
+      persons.map((personDetail) => <div key={personDetail.number}>{personDetail.name} {personDetail.number}</div>)
     }
     </div>
   )
@@ -12,14 +12,20 @@ const DisplayPersonDetails = ({persons}) => {
 
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: 'Arto Hellas' }
+    { 
+      name: 'Arto Hellas',
+      number: '040-1234567'
+    }
   ]) 
   const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
 
   const addPerson = (event) => {
     event.preventDefault()
+
     const newPerson = {
-      name: newName
+      name: newName,
+      number: newNumber
     }
     const result = persons.filter((person) => JSON.stringify(person) === JSON.stringify(newPerson))
 
@@ -36,6 +42,10 @@ const App = () => {
       <form>
         <div>
           name: <input value={newName} onChange={(e) => setNewName(e.target.value)}/>
+        </div>
+
+        <div>
+          number: <input value={newNumber} onChange={(e) => setNewNumber(e.target.value)}/>
         </div>
 
         <div>
