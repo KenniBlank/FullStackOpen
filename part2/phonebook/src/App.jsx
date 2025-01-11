@@ -1,13 +1,11 @@
 import { useState } from 'react'
 
-const DisplayPersonDetails = ({persons, filter}) => {
+const Persons = ({persons, filter}) => {
   filter = filter.toLowerCase()
 
   const filtered = persons.filter((personDetail) => {
     return (personDetail.name.toLowerCase()).includes(filter)
   })
-
-  console.log(filtered);
 
   return (
     <>
@@ -17,6 +15,30 @@ const DisplayPersonDetails = ({persons, filter}) => {
         })
       }
     </>
+  )
+}
+
+const Filter = ({value, change}) => {
+  return (
+    <>
+      filter shown with: <input value={value} onChange={change}/>
+    </>
+  )
+}
+
+const PersonForm = (props) => {
+  return (
+    <form>
+      <div>
+        name: <input value={props.newName} onChange={props.newNameChange}/>
+      </div>
+      <div>
+        number: <input value={props.newNumber} onChange={props.newNumberChange}/>
+      </div>
+      <div>
+          <button type="submit" onClick={props.addPerson}>add</button>
+        </div>
+    </form>
   )
 }
 
@@ -56,27 +78,19 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
 
-      <div>
-        filter shown with: <input value={newFilter} onChange={e => setFilterValue(e.target.value)}/>
-      </div>
+      <Filter change={e => setFilterValue(e.target.value)} value={newFilter}/>
 
       <h2>add a new</h2>
-      <form>
-        <div>
-          name: <input value={newName} onChange={(e) => setNewName(e.target.value)}/>
-        </div>
 
-        <div>
-          number: <input value={newNumber} onChange={(e) => setNewNumber(e.target.value)}/>
-        </div>
-
-        <div>
-          <button type="submit" onClick={addPerson}>add</button>
-        </div>
-      </form>
+      <PersonForm 
+        newName={newName} newNameChange={(e) => setNewName(e.target.value)}
+        newNumber={newNumber} newNumberChange={e => setNewNumber(e.target.value)}
+        addPerson={addPerson}
+      />
+      
       <h2>Numbers</h2>
 
-      <DisplayPersonDetails persons={persons} filter={newFilter}/>
+      <Persons persons={persons} filter={newFilter}/>
     </div>
   )
 }
