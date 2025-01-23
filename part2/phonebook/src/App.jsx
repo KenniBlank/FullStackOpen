@@ -4,16 +4,16 @@ import axios from 'axios'
 const Persons = ({persons, filter}) => {
   filter = filter.toLowerCase()
 
-  const filtered = persons.filter((personDetail) => {
-    return (personDetail.name.toLowerCase()).includes(filter)
-  })
+  const filtered = persons.filter(personDetail => (personDetail.name.toLowerCase()).includes(filter))
 
   return (
     <>
       {
-        filtered.map((personDetail) => {
-          return <div key={personDetail.id}>{personDetail.name} {personDetail.number}</div>
-        })
+        filtered.map(personDetail => 
+          <div key={personDetail.id}>
+              {personDetail.name} {personDetail.number}
+          </div>
+        )
       }
     </>
   )
@@ -49,9 +49,7 @@ const App = () => {
   useEffect(() => {
     axios
         .get('http://localhost:3001/persons')
-        .then ((response) => {
-            setPersons(response.data)
-        })
+        .then (response => setPersons(response.data))
   }, [])
 
   const [newName, setNewName] = useState('')
@@ -63,8 +61,7 @@ const App = () => {
 
     const newPerson = {
       name: newName,
-      number: newNumber,
-      id: persons[persons.length - 1].id + 1
+      number: newNumber
     }
     const result = persons.filter(
       (person) => 
@@ -74,7 +71,9 @@ const App = () => {
     if (result.length > 0) {
       alert (`${newName} is already added to phonebook`)
     } else if (result.length == 0) {
-      setPersons([...persons, newPerson])
+      axios
+        .post("http://localhost:3001/persons", newPerson)
+        .then(response => setPersons([...persons, response.data]))
     }
   }
 
