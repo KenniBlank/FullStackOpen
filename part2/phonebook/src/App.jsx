@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const Persons = ({persons, filter}) => {
+const Persons = ({persons, filter, deletePerson}) => {
   filter = filter.toLowerCase()
 
   const filtered = persons.filter(personDetail => (personDetail.name.toLowerCase()).includes(filter))
@@ -12,6 +12,7 @@ const Persons = ({persons, filter}) => {
         filtered.map(personDetail => 
           <div key={personDetail.id}>
               {personDetail.name} {personDetail.number}
+              <button onClick={() => deletePerson(personDetail)}>delete</button>
           </div>
         )
       }
@@ -56,6 +57,21 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setFilterValue] = useState('')
 
+  const deletePerson = (personDetail) => {
+    if (window.confirm(`Delete ${personDetail.name}`)) {
+      axios
+        .delete(`http://localhost:3001/persons/${personDetail.id}`)
+        .then(
+          response => {
+            let personsUpdated = persons.filter(person => {
+              return person.id !== response.data.id
+            })
+            setPersons(personsUpdated)
+          }
+        )
+    }
+  }
+
   const addPerson = (event) => {
     event.preventDefault()
 
@@ -93,7 +109,7 @@ const App = () => {
       
       <h2>Numbers</h2>
 
-      <Persons persons={persons} filter={newFilter}/>
+      <Persons persons={persons} filter={newFilter} deletePerson={deletePerson}/>
     </div>
   )
 }
