@@ -79,13 +79,21 @@ const App = () => {
       name: newName,
       number: newNumber
     }
-    const result = persons.filter(
-      (person) => 
-        JSON.stringify({name: person.name, number: person.number}) === JSON.stringify({name: newPerson.name, number: newPerson.number})
-    )
 
-    if (result.length > 0) {
-      alert (`${newName} is already added to phonebook`)
+    const result = persons.filter(personDetail => (personDetail.name.toLowerCase()).includes(newName.toLowerCase()))
+
+    if (result.length === 1) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with new one?`)) {
+        console.log(result[0])
+        axios
+          .put(`http://localhost:3001/persons/${result[0].id}`, newPerson)
+          .then(response => {
+            let personsUpdated = persons.filter(person => {
+              return person.id !== response.data.id
+            })
+            setPersons([...personsUpdated, response.data])
+          })
+      }
     } else if (result.length == 0) {
       axios
         .post("http://localhost:3001/persons", newPerson)
