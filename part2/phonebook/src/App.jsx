@@ -1,6 +1,28 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const Notification = ({message}) => {
+    if (message) {
+        const style = {
+          color: "green",
+          fontStyle: "bold",
+          fontSize: "20px",
+          marginBottom: "10px",
+          background: "lightgrey",
+          padding: "10px",
+          border: "3px solid green",
+          borderRadius: "5px",
+          width: "fit-content",
+        }
+
+        return (
+            <div style={style}>
+                {message}
+            </div>
+        )
+    }
+}
+
 const Persons = ({persons, filter, deletePerson}) => {
   filter = filter.toLowerCase()
 
@@ -56,6 +78,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setFilterValue] = useState('')
+  const defaultNotificationText = "Notification Placeholder..."
+  const [notificationMessage, setNotificationMessage] = useState(defaultNotificationText)
 
   const deletePerson = (personDetail) => {
     if (window.confirm(`Delete ${personDetail.name}`)) {
@@ -91,19 +115,30 @@ const App = () => {
             let personsUpdated = persons.filter(person => {
               return person.id !== response.data.id
             })
+            setNotificationMessage(`Updated ${newPerson.name}'s Contact Number`)
+            setTimeout(() => {
+              setNotificationMessage(defaultNotificationText)
+            }, 5000)
             setPersons([...personsUpdated, response.data])
           })
       }
     } else if (result.length == 0) {
       axios
         .post("http://localhost:3001/persons", newPerson)
-        .then(response => setPersons([...persons, response.data]))
+        .then(response => {
+            setNotificationMessage(`Added "${newPerson.name}"`)
+            setTimeout(() => {
+              setNotificationMessage(defaultNotificationText)
+            }, 5000)
+            setPersons([...persons, response.data])
+        })
     }
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage}/>
 
       <Filter change={e => setFilterValue(e.target.value)} value={newFilter}/>
 
