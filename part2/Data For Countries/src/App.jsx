@@ -59,7 +59,7 @@ const FilterCountries = ({countries, filter}) => {
       <>
         {filteredCountries.map(country => {
           return(
-            <div>{country.name.common}</div>
+            <div key={country.name.common}>{country.name.common}</div>
           )
         })}
       </>
