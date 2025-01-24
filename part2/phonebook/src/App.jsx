@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const Notification = ({message}) => {
+const Notification = ({message, color}) => {
     if (message) {
         const style = {
-          color: "green",
+          color: color,
           fontStyle: "bold",
           fontSize: "20px",
           marginBottom: "10px",
           background: "lightgrey",
           padding: "10px",
-          border: "3px solid green",
+          border: `3px solid ${color}`,
           borderRadius: "5px",
           width: "fit-content",
         }
@@ -78,8 +78,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setFilterValue] = useState('')
-  const defaultNotificationText = "Notification Placeholder..."
-  const [notificationMessage, setNotificationMessage] = useState(defaultNotificationText)
+  const [notificationMessage, setNotificationMessage] = useState('')
+  const [notificationColor, setNotificationColor] = useState('')
 
   const deletePerson = (personDetail) => {
     if (window.confirm(`Delete ${personDetail.name}`)) {
@@ -93,6 +93,13 @@ const App = () => {
             setPersons(personsUpdated)
           }
         )
+        .catch(error => {
+          setNotificationColor("red")
+          setNotificationMessage(`Information of ${personDetail.name} has already been removed from server`)
+
+          let personsUpdated = persons.filter(person => person.id !== personDetail.id)
+          setPersons(personsUpdated)
+        })
     }
   }
 
@@ -116,8 +123,10 @@ const App = () => {
               return person.id !== response.data.id
             })
             setNotificationMessage(`Updated ${newPerson.name}'s Contact Number`)
+            setNotificationColor("green")
+
             setTimeout(() => {
-              setNotificationMessage(defaultNotificationText)
+              setNotificationMessage('')
             }, 5000)
             setPersons([...personsUpdated, response.data])
           })
@@ -127,18 +136,20 @@ const App = () => {
         .post("http://localhost:3001/persons", newPerson)
         .then(response => {
             setNotificationMessage(`Added "${newPerson.name}"`)
+            setNotificationColor("green")
+
             setTimeout(() => {
-              setNotificationMessage(defaultNotificationText)
+              setNotificationMessage('')
             }, 5000)
             setPersons([...persons, response.data])
-        })
+          })
     }
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notificationMessage}/>
+      <Notification message={notificationMessage} color={notificationColor}/>
 
       <Filter change={e => setFilterValue(e.target.value)} value={newFilter}/>
 
