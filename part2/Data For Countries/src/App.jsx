@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const api_key = import.meta.env.VITE_SOME_KEY
+
 const ShowCountryDetails = ({ country }) => {
     const name = country.name.common;
     const area = country.area;
@@ -10,9 +12,7 @@ const ShowCountryDetails = ({ country }) => {
     for (let key in country.languages) {
         langKey.push(key);
     }
-
     const flag = country.flag;
-
     const style = { fontSize: "10rem" };
 
     return (
@@ -30,9 +30,43 @@ const ShowCountryDetails = ({ country }) => {
             </ul>
 
             <div style={style}>{flag}</div>
+            <ShowWeatherDetails capital={capital} />
         </div>
     );
 };
+
+
+const ShowWeatherDetails = ({ capital }) => {
+    const [weatherData, setWeatherData] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [weatherIconId, setWeatherIconId] = useState(null)
+    const api_request = `https://api.openweathermap.org/data/2.5/weather?q=${capital}&appid=${api_key}`
+    const weatherIcon = weatherIconId ? `https://openweathermap.org/img/wn/${weatherIconId}@2x.png` : '';
+
+    useEffect(() => {
+        axios
+            .get(api_request)
+            .then((response) => {
+                console.log(response)
+                setWeatherData(response.data)
+                setWeatherIconId(response.data.weather[0].icon)
+                setLoading(false)
+            })
+            .catch(() => console.log("Error Getting Data From Server"));
+    }, [capital]);
+
+    if (loading) {
+        return (
+            <div>Loading...</div>
+        )
+    }
+    return (<>
+        <h2>Weather in {capital}</h2>
+        <div>temperature {(weatherData.main.temp - 273.15).toFixed(2)} C</div>
+        <img src={weatherIcon} />
+        <div>wind {weatherData.wind.speed} m/s</div>
+    </>)
+}
 
 const FilterCountries = ({ countries, filter }) => {
     const [countryToShow, setCountryToShow] = useState(null);
@@ -80,7 +114,6 @@ const App = () => {
             .then((response) => setCountries(response.data))
             .catch(() => console.log("Error Getting Data From Server"));
     }, []);
-
     return (
         <>
             <div>
