@@ -62,7 +62,7 @@ const ShowWeatherDetails = ({ capital }) => {
     }
     return (<>
         <h2>Weather in {capital}</h2>
-        <div>temperature {(weatherData.main.temp - 273.15).toFixed(2)} C</div>
+        <div>temperature {(weatherData.main.temp - 273.15).toFixed(2)}°C</div>
         <img src={weatherIcon} />
         <div>wind {weatherData.wind.speed} m/s</div>
     </>)
