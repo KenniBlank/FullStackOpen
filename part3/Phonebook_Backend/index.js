@@ -59,16 +59,30 @@ App.delete("/api/persons/:id", (request, response) => {
 })
 
 App.post("/api/persons", (request, response) => {
-    const body = request.body
-    const newId = String((Math.ceil(Math.random() * 100000)))
+    const body = request.body;
 
-    const newPerson = {
-        id: newId,
-        name: body.name,
-        number: body.number,
+    // Check if name is provided
+    if (!body.name) {
+        return response.status(400).json({ error: "no name was provided" });
     }
 
-    persons = persons.concat(newPerson)
+    // Check if number is provided
+    if (!body.number) {
+        return response.status(400).json({ error: "no number was provided" });
+    }
 
-    response.json(newPerson)
+    // Check for unique name
+    const uniquePerson = persons.find(person => person.name === body.name);
+    if (uniquePerson) {
+        return response.status(400).json({ error: "name must be unique" });
+    }
+    
+    const newPerson = {
+        id: String(Math.ceil(Math.random() * 100000)),
+        name: body.name,
+        number: body.number,
+    };
+
+    persons = persons.concat(newPerson);
+    response.status(201).json(newPerson);
 })
