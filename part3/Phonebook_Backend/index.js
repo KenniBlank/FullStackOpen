@@ -57,3 +57,18 @@ App.delete("/api/persons/:id", (request, response) => {
     persons = persons.filter(person => person.id !== id)
     response.status(204).end()
 })
+
+App.post("/api/persons", (request, response) => {
+    const body = request.body
+    const newId = String((Math.ceil(Math.random() * 100000)))
+
+    const newPerson = {
+        id: newId,
+        name: body.name,
+        number: body.number,
+    }
+
+    persons = persons.concat(newPerson)
+
+    response.json(newPerson)
+})
