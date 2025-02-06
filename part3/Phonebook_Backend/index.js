@@ -1,6 +1,10 @@
 const express = require("express")
-const App = express();
-App.use(express.json())
+const morgan = require("morgan")
+
+const app = express();
+
+app.use(express.json());
+app.use(morgan('tiny'));
 
 let persons = [
     { 
@@ -26,21 +30,21 @@ let persons = [
 ]
 
 const PORT = 3001
-App.listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`The server is running at http://localhost:${PORT}`)
 })
 
-App.get("/api/persons", (request, response) => {
+app.get("/api/persons", (request, response) => {
     response.json(persons)
 })
 
-App.get("/info", (request, response) => {
+app.get("/info", (request, response) => {
     const currentTime = new Date();
     let length = persons.length;
     response.send(`<div>Phonebook has info for ${length} people</div><div>${currentTime}</div`)
 })
 
-App.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response) => {
     const id = request.params.id;
     const person = persons.find(person => person.id === id)
 
@@ -51,14 +55,14 @@ App.get("/api/persons/:id", (request, response) => {
     }
 })
 
-App.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response) => {
     const id = request.params.id
 
     persons = persons.filter(person => person.id !== id)
     response.status(204).end()
 })
 
-App.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response) => {
     const body = request.body;
 
     // Check if name is provided
