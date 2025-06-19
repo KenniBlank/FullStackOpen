@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const BASE_URL = "https://fullstackopen-zaj2.onrender.com";
+const BASE_URL = ""; // No need for base_url as it can be made relative
 
 const Notification = ({ message, color }) => {
     if (message) {
