@@ -26,33 +26,45 @@ app.use(cors());
 app.use(express.static("dist"));
 
 app.get("/api/persons", (request, response) => {
-    return response.json(persons).end();
+    Phonebook.find({}).then((result) => {
+        return response.json(result).end();
+    });
 });
 
 app.get("/info", (request, response) => {
-    const currentData = new Date();
-    let responseData = `<p>Phonebook has info for ${persons.length} people</p>`;
-    responseData += `${currentData.toString()}`;
-    return response.send(responseData);
+    Phonebook.find({}).then((result) => {
+        const currentData = new Date();
+        let responseData = `<p>Phonebook has info for ${result.length} people</p>`;
+        responseData += `${currentData.toString()}`;
+        return response.send(responseData);
+    });
 });
 
 app.get("/api/persons/:id", (request, response) => {
-    const person = persons.find((person) => person.id === request.params.id);
-    if (!person)
-        return response.status(404).json({ error: "Person not found" });
-    return response.json(person);
+    Phonebook.findById(String(request.params.id))
+        .then((personDetail) => {
+            return response.json(personDetail);
+        })
+        .catch((err) => {
+            console.log(err);
+            return response.status(404).json({ error: "Person not found" });
+        });
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-    persons = persons.filter((person) => person.id !== request.params.id);
-    return response.status(204).end();
+app.delete("/api/persons/:id", (request, response, next) => {
+    Phonebook.findByIdAndDelete(request.params.id)
+        .then((result) => {
+            if (result) {
+                response.status(204).end();
+            } else {
+                response.status(404).send({ error: "Person not found" });
+            }
+        })
+        .catch((error) => next(error)); // Pass to error handler middleware
 });
 
+// Add new person to phonebook
 app.post("/api/persons", (request, response) => {
-    const newId = () => {
-        return String(Math.floor(Math.random() * 1e15)); // Bad but requirement for the course exercise
-    };
-
     const reqData = request.body;
     if (!reqData.name || !reqData.number) {
         return response
@@ -60,18 +72,23 @@ app.post("/api/persons", (request, response) => {
             .json({ error: "Both name and number fields required" });
     }
 
-    if (persons.some((person) => person.name == reqData.name)) {
-        return response.status(409).json({ error: "Name must be unique" });
-    }
-
-    const newPerson = {
-        id: newId(),
+    const newPerson = new Phonebook({
         name: reqData.name,
         number: reqData.number,
-    };
+    });
 
-    persons.push(newPerson);
-    return response.status(201).json(newPerson);
+    newPerson
+        .save()
+        .then((savedPerson) => {
+            console.log(savedPerson);
+            return response.status(201).json(newPerson);
+        })
+        .catch((err) => {
+            console.log("Failed to add: ", err);
+            return response
+                .status(400)
+                .json({ error: "Error adding newData to phoenbook" });
+        });
 });
 
 const PORT = process.env.PORT || 3001;
