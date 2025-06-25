@@ -41,13 +41,17 @@ app.get("/info", (request, response) => {
 });
 
 app.get("/api/persons/:id", (request, response) => {
-    Phonebook.findById(String(request.params.id))
+    Phonebook.findById(request.params.id)
         .then((personDetail) => {
-            return response.json(personDetail);
+            if (personDetail) {
+                return response.json(personDetail);
+            } else {
+                return response.status(404).json({ error: "Person not found" });
+            }
         })
         .catch((err) => {
             console.log(err);
-            return response.status(404).json({ error: "Person not found" });
+            response.status(400).send({ error: "malformatted id" });
         });
 });
 
@@ -95,3 +99,11 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+const errorHandler = (error, request, response, next) => {
+    console.log(error);
+
+    next();
+};
+
+app.use(errorHandler);
