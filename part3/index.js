@@ -95,6 +95,25 @@ app.post("/api/persons", (request, response) => {
         });
 });
 
+app.put("/api/persons/:id", (request, response, next) => {
+    const { name, number } = request.body;
+
+    Phonebook.findById(request.params.id)
+        .then((person) => {
+            if (!person) {
+                return response.status(404).end();
+            }
+
+            person.name = name;
+            person.number = number;
+
+            return person.save().then((updatedPersonEntry) => {
+                response.json(updatedPersonEntry);
+            });
+        })
+        .catch((error) => next(error));
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
