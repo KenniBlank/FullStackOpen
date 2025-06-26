@@ -50,7 +50,6 @@ app.get("/api/persons/:id", (request, response) => {
             }
         })
         .catch((err) => {
-            console.log("Error here?", err);
             response.status(400).send({ error: "malformatted id" });
         });
 });
@@ -135,10 +134,8 @@ const errorHandler = (error, request, response, next) => {
         case "CastError":
             return response.status(400).send({ error: "malformatted ID" });
         case "ValidationError":
-            console.log(error.message);
             return response.status(400).json({ error: error.message });
         default:
-            console.log("Unknown error in server: ", error.name);
             return response.status(500).json({ error: error.message });
     }
 };

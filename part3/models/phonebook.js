@@ -6,7 +6,6 @@ mongoose.set("strictQuery", false);
 
 const URL = process.env.MONGODB_URL;
 
-console.log("Connecting to: ", URL);
 mongoose
     .connect(URL)
     .then(() => {
@@ -27,21 +26,33 @@ const phoneBookScheme = new mongoose.Schema({
         required: true,
         validate: {
             validator: function (value) {
-                if (value.length >= 8) {
-                    const arr = value.split("-");
-                    if (arr.length === 2) {
-                        const firstPartLength = arr[0].length;
-                        if (firstPartLength === 2 || firstPartLength === 3) {
-                            return true;
-                        }
-                    }
+                if (value.length < 8) {
+                    this.message =
+                        "Phonenumber must be at least 8 characters long.";
+                    return false;
                 }
 
-                return false;
-            },
+                const arr = value.split("-");
+                if (arr.length !== 2) {
+                    this.message =
+                        'Phonenumber must contain exactly one "-" character.';
+                    return false;
+                }
 
-            message:
-                'Username must be 8 char or longer and must contain \"-\" that separates numbers',
+                if (isNaN(firstPart) || isNaN(secondPart)) {
+                    this.message = "Phoennumber must be a numeric";
+                    return false;
+                }
+                const firstPartLength = arr[0].length;
+                if (firstPartLength != 2 || firstPartLength != 3) {
+                    this.message =
+                        'The part before "-" must have 2 or 3 numbers';
+                    return false;
+                }
+
+                return true;
+            },
+            message: "Phonenumber Invalid",
         },
     },
 });
