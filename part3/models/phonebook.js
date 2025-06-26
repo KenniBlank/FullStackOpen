@@ -22,7 +22,28 @@ const phoneBookScheme = new mongoose.Schema({
         minLength: 3,
         required: true,
     },
-    number: String,
+    number: {
+        type: String,
+        required: true,
+        validate: {
+            validator: function (value) {
+                if (value.length >= 8) {
+                    const arr = value.split("-");
+                    if (arr.length === 2) {
+                        const firstPartLength = arr[0].length;
+                        if (firstPartLength === 2 || firstPartLength === 3) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            },
+
+            message:
+                'Username must be 8 char or longer and must contain \"-\" that separates numbers',
+        },
+    },
 });
 
 phoneBookScheme.set("toJSON", {
