@@ -50,7 +50,7 @@ app.get("/api/persons/:id", (request, response) => {
             }
         })
         .catch((err) => {
-            console.log(err);
+            console.log("Error here?", err);
             response.status(400).send({ error: "malformatted id" });
         });
 });
@@ -68,7 +68,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
 });
 
 // Add new person to phonebook
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
     const reqData = request.body;
     if (!reqData.name || !reqData.number) {
         return response
@@ -81,17 +81,23 @@ app.post("/api/persons", (request, response) => {
         number: reqData.number,
     });
 
-    newPerson
-        .save()
-        .then((savedPerson) => {
-            console.log(savedPerson);
-            return response.status(201).json(newPerson);
+    Phonebook.create({
+        name: reqData.name,
+        number: reqData.number,
+    })
+        .then((createdPerson) => {
+            createdPerson
+                .save()
+                .then((savedPerson) => {
+                    console.log(savedPerson);
+                    return response.status(201).json(newPerson);
+                })
+                .catch((error) => {
+                    next(error);
+                });
         })
-        .catch((err) => {
-            console.log("Failed to add: ", err);
-            return response
-                .status(400)
-                .json({ error: "Error adding newData to phoenbook" });
+        .catch((error) => {
+            next(error);
         });
 });
 
@@ -125,9 +131,16 @@ app.listen(PORT, () => {
 });
 
 const errorHandler = (error, request, response, next) => {
-    console.log(error);
-
-    next();
+    switch (error.name) {
+        case "CastError":
+            return response.status(400).send({ error: "malformatted ID" });
+        case "ValidationError":
+            console.log(error.message);
+            return response.status(400).json({ error: error.message });
+        default:
+            console.log("Unknown error in server: ", error.name);
+            return response.status(500).json({ error: error.message });
+    }
 };
 
 app.use(errorHandler);

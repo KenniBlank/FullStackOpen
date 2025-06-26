@@ -8,7 +8,8 @@
         "build": "vite build",
         "lint": "eslint .",
         "preview": "vite preview",
-        "server": "json-server -p3002 --watch db.json"
+        "server": "json-server -p3002 --watch db.json",
+        "buildMove": "vite build && rm ../../part3/dist -rf && mv dist ../../part3"
     },
     "dependencies": {
         "axios": "^1.7.9",

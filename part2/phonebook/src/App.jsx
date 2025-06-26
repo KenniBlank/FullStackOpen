@@ -154,13 +154,21 @@ const App = () => {
             axios
                 .post(`${BASE_URL}/api/persons`, newPerson)
                 .then((response) => {
-                    setNotificationMessage(`Added "${newPerson.name}"`);
+                    setNotificationMessage(`Added "${response.data.name}"`);
                     setNotificationColor("green");
 
                     setTimeout(() => {
                         setNotificationMessage("");
                     }, 5000);
                     setPersons([...persons, response.data]);
+                })
+                .catch((error) => {
+                    setNotificationMessage(error.response.data.error);
+                    setNotificationColor("red");
+
+                    setTimeout(() => {
+                        setNotificationMessage("");
+                    }, 5000);
                 });
         }
     };
