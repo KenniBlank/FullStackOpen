@@ -35,18 +35,19 @@ const phoneBookScheme = new mongoose.Schema({
                 const arr = value.split("-");
                 if (arr.length !== 2) {
                     this.message =
-                        'Phonenumber must contain exactly one "-" character.';
+                        "Phonenumber must contain exactly one \"-\" character.";
                     return false;
                 }
 
+                const { firstPart, secondPart } = arr;
                 if (isNaN(firstPart) || isNaN(secondPart)) {
                     this.message = "Phoennumber must be a numeric";
                     return false;
                 }
                 const firstPartLength = arr[0].length;
-                if (firstPartLength != 2 || firstPartLength != 3) {
+                if (firstPartLength !== 2 || firstPartLength !== 3) {
                     this.message =
-                        'The part before "-" must have 2 or 3 numbers';
+                        "The part before \"-\" must have 2 or 3 numbers";
                     return false;
                 }
 

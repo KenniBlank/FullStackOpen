@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 if (process.argv.length < 3) {
     console.log(
-        `Usecase: node *.js <db-password> Phonebook-name Phoenbook-number \n\t or node *.js <db-password>`,
+        "Usecase: node *.js <db-password> Phonebook-name Phoenbook-number \n\t or node *.js <db-password>",
     );
     process.exit(1);
 }

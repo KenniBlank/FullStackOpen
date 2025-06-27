@@ -8,7 +8,7 @@ const app = express();
 
 // Morgan custom token
 morgan.token("POST-data", (request) => {
-    if (request.method == "POST") {
+    if (request.method === "POST") {
         return `${JSON.stringify(request.body)}`;
     } else {
         return " ";
@@ -23,7 +23,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cors());
-app.use(express.static("dist"));
+// app.use(express.static("dist"));
 
 app.get("/api/persons", (request, response) => {
     Phonebook.find({}).then((result) => {
@@ -49,7 +49,7 @@ app.get("/api/persons/:id", (request, response) => {
                 return response.status(404).json({ error: "Person not found" });
             }
         })
-        .catch((err) => {
+        .catch(() => {
             response.status(400).send({ error: "malformatted id" });
         });
 });
@@ -124,14 +124,14 @@ const unknowEndPoint = (request, response) => {
 };
 app.use(unknowEndPoint);
 
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, request, response) => {
     switch (error.name) {
-        case "CastError":
-            return response.status(400).send({ error: "malformatted ID" });
-        case "ValidationError":
-            return response.status(400).json({ error: error.message });
-        default:
-            return response.status(500).json({ error: error.message });
+    case "CastError":
+        return response.status(400).send({ error: "malformatted ID" });
+    case "ValidationError":
+        return response.status(400).json({ error: error.message });
+    default:
+        return response.status(500).json({ error: error.message });
     }
 };
 app.use(errorHandler);
