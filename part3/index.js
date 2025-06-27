@@ -119,10 +119,10 @@ app.put("/api/persons/:id", (request, response, next) => {
         .catch((error) => next(error));
 });
 
-const unknowEndPoint = (request, response) => {
-    response.status(404).send({ error: "Unknown Endpoint" });
-};
-app.use(unknowEndPoint);
+// const unknowEndPoint = (request, response) => {
+//     response.status(404).send({ error: "Unknown Endpoint" });
+// };
+// app.use(unknowEndPoint);
 
 const errorHandler = (error, request, response, next) => {
     switch (error.name) {
