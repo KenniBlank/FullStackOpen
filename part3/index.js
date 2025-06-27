@@ -124,11 +124,6 @@ const unknowEndPoint = (request, response) => {
 };
 app.use(unknowEndPoint);
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
 const errorHandler = (error, request, response, next) => {
     switch (error.name) {
         case "CastError":
@@ -139,5 +134,9 @@ const errorHandler = (error, request, response, next) => {
             return response.status(500).json({ error: error.message });
     }
 };
-
 app.use(errorHandler);
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
