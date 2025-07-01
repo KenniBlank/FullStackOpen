@@ -1,0 +1,16 @@
+@baseUrl = http://localhost:3003
+
+# Login
+POST {{baseUrl}}/api/blogs
+Content-Type: application/json
+
+{
+    "title": "Time Machine",
+    "author": "Daru",
+    "url": "Black For Now",
+    "likes": 2
+}
+###
+
+# Get User
+GET {{baseUrl}}/api/blogs
