@@ -5,10 +5,10 @@ POST {{baseUrl}}/api/blogs
 Content-Type: application/json
 
 {
-    "title": "Time Machine",
-    "author": "Daru",
-    "url": "Black For Now",
-    "likes": 2
+    "title": "El Psy Congroo",
+    "author": "Okarin",
+    "url": "Blank For Now",
+    "likes": 9
 }
 ###
 
