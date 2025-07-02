@@ -121,3 +121,26 @@ describe("Most Blogs", () => {
         });
     });
 });
+
+describe("Most Likes", () => {
+    test("most likes, when blogs empty", () => {
+        assert.deepStrictEqual(listHelper.mostLikes([]), {
+            author: "",
+            likes: 0,
+        });
+    });
+
+    test("most likes, when only one blogs passed", () => {
+        assert.deepStrictEqual(listHelper.mostLikes(listWithOneBlog), {
+            author: "Edsger W. Dijkstra",
+            likes: 5,
+        });
+    });
+
+    test("most likes, when multiple blogs passed", () => {
+        assert.deepStrictEqual(listHelper.mostLikes(blogs), {
+            author: "Edsger W. Dijkstra",
+            likes: 17,
+        });
+    });
+});

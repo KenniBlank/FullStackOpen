@@ -45,9 +45,35 @@ const mostBlogs = (blogs) => {
     return mostBlogAuthor;
 };
 
+const mostLikes = (blogs) => {
+    const mostLikedAuthor = {
+        author: "",
+        likes: 0,
+    };
+
+    let dict = {};
+    [...new Set(blogs.map((blog) => blog.author))].forEach((author) => {
+        dict[author] = 0;
+    });
+
+    blogs.forEach((blog) => {
+        dict[blog.author] += blog.likes;
+    });
+
+    for (const [key, value] of Object.entries(dict)) {
+        if (value > mostLikedAuthor.likes) {
+            mostLikedAuthor.author = key;
+            mostLikedAuthor.likes = value;
+        }
+    }
+
+    return mostLikedAuthor;
+};
+
 module.exports = {
     dummy,
     totalLikes,
     favoriteBlog,
     mostBlogs,
+    mostLikes,
 };
