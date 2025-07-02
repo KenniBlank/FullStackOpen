@@ -107,6 +107,13 @@ describe("Most Blogs", () => {
         });
     });
 
+    test("most blogs, when one blog passed", () => {
+        assert.deepStrictEqual(listHelper.mostBlogs(listWithOneBlog), {
+            author: "Edsger W. Dijkstra",
+            blogs: 1,
+        });
+    });
+
     test("most blogs, when multiple blogs are passed", () => {
         assert.deepStrictEqual(listHelper.mostBlogs(blogs), {
             author: "Robert C. Martin",
