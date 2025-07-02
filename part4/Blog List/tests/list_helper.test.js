@@ -98,3 +98,19 @@ describe("Favorite Blog", () => {
         assert.deepStrictEqual(listHelper.favoriteBlog(blogs), blogs[2]);
     });
 });
+
+describe("Most Blogs", () => {
+    test("most blogs, when blogs empty", () => {
+        assert.deepStrictEqual(listHelper.mostBlogs([]), {
+            author: "",
+            blogs: 0,
+        });
+    });
+
+    test("most blogs, when multiple blogs are passed", () => {
+        assert.deepStrictEqual(listHelper.mostBlogs(blogs), {
+            author: "Robert C. Martin",
+            blogs: 3,
+        });
+    });
+});
