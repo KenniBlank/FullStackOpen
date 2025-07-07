@@ -62,7 +62,7 @@ describe("Post request successfull", async () => {
     });
 });
 
-test.only("If likes property is missing, it defaults to zero", async () => {
+test("If likes property is missing, it defaults to zero", async () => {
     const likesMissingBlog = {
         title: "Dath's Game",
         author: "B. Twar",
@@ -75,6 +75,15 @@ test.only("If likes property is missing, it defaults to zero", async () => {
         .expect("Content-Type", /application\/json/);
 
     assert.strictEqual(result.body.likes, 0);
+});
+
+test.only("If title/url is missing, backend sends 400 status code i.e bad request", async () => {
+    const blogWithoutTitleNorURL = {
+        author: "Somebody",
+    };
+
+    let result = await API.post("/api/blogs").send(blogWithoutTitleNorURL);
+    assert.strictEqual(result.statusCode, 400);
 });
 
 after(async () => {
