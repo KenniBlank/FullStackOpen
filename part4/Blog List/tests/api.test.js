@@ -62,6 +62,21 @@ describe("Post request successfull", async () => {
     });
 });
 
+test.only("If likes property is missing, it defaults to zero", async () => {
+    const likesMissingBlog = {
+        title: "Dath's Game",
+        author: "B. Twar",
+        url: "http://www.someWebSite.com/blogs/123aw2/",
+    };
+
+    let result = await API.post("/api/blogs")
+        .send(likesMissingBlog)
+        .expect(201)
+        .expect("Content-Type", /application\/json/);
+
+    assert.strictEqual(result.body.likes, 0);
+});
+
 after(async () => {
     await mongoose.connection.close();
 });
