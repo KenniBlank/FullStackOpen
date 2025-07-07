@@ -1,5 +1,5 @@
 const { test, describe } = require("node:test");
-const blogs = require("./test_helper").initialBlogs;
+const blogs = require("./api_test_helper").initialBlogs;
 const assert = require("node:assert");
 const listHelper = require("../utils/list_helper");
 
