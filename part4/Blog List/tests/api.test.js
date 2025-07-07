@@ -29,6 +29,39 @@ test("Verifing that unique identifier property of the blog posts is named id and
     }
 });
 
+describe("Post request successfull", async () => {
+    const beforePost_blogsInDB = await helper.allBlogsInDB();
+
+    const newBlog = {
+        title: "Royal Massacre",
+        author: "B. Twar",
+        url: "http://www.cs.utexas.edu/~EWD/transcriptions/31232131/3123213.html",
+        likes: 52,
+    };
+
+    let result = await API.post("/api/blogs")
+        .send(newBlog)
+        .expect(201)
+        .expect("Content-Type", /application\/json/);
+    result = result.body;
+
+    const afterPost_blogsInDB = await helper.allBlogsInDB();
+
+    test("After post, DB's total length increases by one", () => {
+        assert.strictEqual(
+            beforePost_blogsInDB.length + 1,
+            afterPost_blogsInDB.length,
+        );
+    });
+
+    test("Correct Information is stored in DB", () => {
+        assert.strictEqual(newBlog.title, result.title);
+        assert.strictEqual(newBlog.author, result.author);
+        assert.strictEqual(newBlog.url, result.url);
+        assert.strictEqual(newBlog.likes, result.likes);
+    });
+});
+
 after(async () => {
     await mongoose.connection.close();
 });
