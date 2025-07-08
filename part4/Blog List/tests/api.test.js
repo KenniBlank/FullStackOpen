@@ -60,30 +60,56 @@ describe("Post request successfull", async () => {
         assert.strictEqual(newBlog.url, result.url);
         assert.strictEqual(newBlog.likes, result.likes);
     });
+
+    test("If likes property is missing, it defaults to zero", async () => {
+        const likesMissingBlog = {
+            title: "Dath's Game",
+            author: "B. Twar",
+            url: "http://www.someWebSite.com/blogs/123aw2/",
+        };
+
+        let result = await API.post("/api/blogs")
+            .send(likesMissingBlog)
+            .expect(201)
+            .expect("Content-Type", /application\/json/);
+
+        assert.strictEqual(result.body.likes, 0);
+    });
+
+    test("If title/url is missing, backend sends 400 status code i.e bad request", async () => {
+        const blogWithoutTitleNorURL = {
+            author: "Somebody",
+        };
+
+        let result = await API.post("/api/blogs").send(blogWithoutTitleNorURL);
+        assert.strictEqual(result.statusCode, 400);
+    });
 });
 
-test("If likes property is missing, it defaults to zero", async () => {
-    const likesMissingBlog = {
-        title: "Dath's Game",
-        author: "B. Twar",
-        url: "http://www.someWebSite.com/blogs/123aw2/",
-    };
+describe("Delete request successfull", () => {
+    test("Deleting resource successfull", async () => {
+        const blogs = await helper.allBlogsInDB();
+        console.log(blogs.length);
+        const response = await API.delete(`/api/blogs/${blogs[0].id}`);
+        assert.strictEqual(response.statusCode, 204);
+    });
 
-    let result = await API.post("/api/blogs")
-        .send(likesMissingBlog)
-        .expect(201)
-        .expect("Content-Type", /application\/json/);
+    test("Deleting same resource twice result in 404", async () => {
+        const blogs = await helper.allBlogsInDB();
 
-    assert.strictEqual(result.body.likes, 0);
-});
+        // Redelete same resource
+        await API.delete(`/api/blogs/${blogs[0].id}`);
+        const response = await API.delete(`/api/blogs/${blogs[0].id}`);
 
-test.only("If title/url is missing, backend sends 400 status code i.e bad request", async () => {
-    const blogWithoutTitleNorURL = {
-        author: "Somebody",
-    };
+        assert.strictEqual(response.statusCode, 404);
+    });
 
-    let result = await API.post("/api/blogs").send(blogWithoutTitleNorURL);
-    assert.strictEqual(result.statusCode, 400);
+    test("Deleting jibrish resource results in 422 i.e Unprocessable Entry", async () => {
+        const jibrishID = "12aASD213AWD";
+
+        const response = await API.delete(`/api/blogs/${jibrishID}`);
+        assert.strictEqual(response.statusCode, 422);
+    });
 });
 
 after(async () => {
