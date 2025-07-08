@@ -89,7 +89,6 @@ describe("Post request successfull", async () => {
 describe("Delete request successfull", () => {
     test("Deleting resource successfull", async () => {
         const blogs = await helper.allBlogsInDB();
-        console.log(blogs.length);
         const response = await API.delete(`/api/blogs/${blogs[0].id}`);
         assert.strictEqual(response.statusCode, 204);
     });
@@ -109,6 +108,53 @@ describe("Delete request successfull", () => {
 
         const response = await API.delete(`/api/blogs/${jibrishID}`);
         assert.strictEqual(response.statusCode, 422);
+    });
+});
+
+describe("Updating info of individual blog posts", () => {
+    test("Updating title, url, likes, author successfull", async () => {
+        const blogs = await helper.allBlogsInDB();
+        let blogToBeUpdated = blogs[0];
+
+        const NEW_AUTHOR = "Someone Else";
+        const NEW_URL = "https://xxaxxxax.com/xxas/dawdaw";
+        const NEW_LIKES = blogToBeUpdated.likes + 10;
+        const NEW_TITLE = "Random";
+
+        blogToBeUpdated = {
+            ...blogToBeUpdated,
+            author: NEW_AUTHOR,
+            url: NEW_URL,
+            likes: NEW_LIKES,
+            title: NEW_TITLE,
+        };
+
+        const result = await API.put(`/api/blogs/${blogToBeUpdated.id}`).send(
+            blogToBeUpdated,
+        );
+
+        assert.strictEqual(result.statusCode, 200);
+        assert.strictEqual(result.body.author, NEW_AUTHOR);
+        assert.strictEqual(result.body.url, NEW_URL);
+        assert.strictEqual(result.body.likes, NEW_LIKES);
+        assert.strictEqual(result.body.title, NEW_TITLE);
+    });
+
+    test("Updating non-existing blog results in 404", async () => {
+        const randomID = "64b6f0e2d5e2f60b8c9c9999"; // valid-looking MongoDB ObjectId format
+
+        const updatedData = {
+            title: "Doesn't matter",
+            author: "No One",
+            url: "https://nowhere.com",
+            likes: 0,
+        };
+
+        const result = await API.put(`/api/blogs/${randomID}`).send(
+            updatedData,
+        );
+
+        assert.strictEqual(result.statusCode, 404);
     });
 });
 
