@@ -1,0 +1,16 @@
+@baseUrl = http://localhost:3003
+
+// Create new blog data
+POST {{baseUrl}}/api/blogs
+Content-Type: application/json
+
+{
+    "title": "Computers are pretty Cool",
+    "author": "Daru",
+    "url": "https://somewebsite.blog/article/1235",
+    "likes": 15
+}
+###
+
+# Get User
+GET {{baseUrl}}/api/blogs

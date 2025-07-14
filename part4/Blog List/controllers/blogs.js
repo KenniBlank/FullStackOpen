@@ -1,7 +1,6 @@
 const Blog = require("../models/blog");
 const logger = require("../utils/logger");
 const config = require("../utils/config");
-const { response } = require("express");
 
 const blogsRouter = require("express").Router();
 
