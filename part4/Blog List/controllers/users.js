@@ -5,10 +5,10 @@ const User = require("../models/user");
 usersRouter.get("/", (request, response, next) => {
     User.find({})
         .then((result) => {
-            response.send(result);
+            return response.send(result);
         })
         .catch((err) => {
-            response.status(500).json({ error: "Error getting data" });
+            return response.status(500).json({ error: "Error getting data" });
             next(err);
         });
 });
@@ -16,9 +16,13 @@ usersRouter.get("/", (request, response, next) => {
 usersRouter.post("/", async (request, response, next) => {
     const { username, password, name } = request.body;
     if (!(username && password && name)) {
-        response
+        return response
             .status(400)
-            .send("Username, password and name must be provided");
+            .json({ error: "Username, password and name must be provided" });
+    } else if (!(username.length > 2 && password.length > 2)) {
+        return response.status(400).json({
+            error: "Username and Password must be at least 3 characters long",
+        });
     }
 
     const saltOrRounds = 11;
@@ -32,7 +36,7 @@ usersRouter.post("/", async (request, response, next) => {
 
     try {
         const createdUserData = await newUser.save();
-        response.status(201).json(createdUserData);
+        return response.status(201).json(createdUserData);
     } catch (err) {
         next(err);
     }

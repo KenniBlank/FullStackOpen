@@ -10,3 +10,13 @@ Content-Type: application/json
     "password": "El Psy Congroo"
 }
 ###
+
+// Invalid User creation
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+    "username": "Hyo",
+    "name": "Okabe Rintaro",
+    "password": "El"
+}
