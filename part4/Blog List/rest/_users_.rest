@@ -16,7 +16,29 @@ POST {{baseUrl}}/api/users
 Content-Type: application/json
 
 {
-    "username": "Hyo",
+    "username": "Hy",
     "name": "Okabe Rintaro",
-    "password": "El"
+    "password": "Elsdw"
+}
+
+### Create a new user
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+    "username": "john_doe",
+    "name": "John Doe",
+    "password": "secure123"
+}
+
+### Create a new blog for that user
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+
+{
+  "title": "Old-School Programming",
+  "author": "John Doe",
+  "url": "https://johnsblog.com/blogs/old-school-programming",
+  "likes": 62,
+  "user": "6878ee55485aeb3b3046acbf"
 }

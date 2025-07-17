@@ -1,19 +1,33 @@
 const Blog = require("../models/blog");
-const logger = require("../utils/logger");
-const config = require("../utils/config");
-
+const User = require("../models/user");
 const blogsRouter = require("express").Router();
+const logger = require("../utils/logger");
 
 blogsRouter.get("/", async (request, response) => {
-    const blogs = await Blog.find({});
+    const blogs = await Blog.find({}).populate("user", {
+        username: 1,
+        name: 1,
+    });
     response.json(blogs);
 });
 
-blogsRouter.post("/", async (request, response) => {
-    const newBlog = new Blog(request.body);
+blogsRouter.post("/", async (request, response, next) => {
+    try {
+        const newBlog = new Blog(request.body);
+        const savedBlog = await newBlog.save();
 
-    const result = await newBlog.save();
-    response.status(201).json(result);
+        const user = await User.findById(savedBlog.user);
+        if (!user) {
+            return response.status(400).json({ error: "Invalid user ID" });
+        }
+
+        user.blogs = [...user.blogs, savedBlog.id];
+        await user.save();
+
+        response.status(201).json(savedBlog);
+    } catch (error) {
+        next(error);
+    }
 });
 
 blogsRouter.delete("/:id", async (request, response) => {

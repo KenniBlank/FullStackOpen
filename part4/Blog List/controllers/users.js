@@ -2,15 +2,17 @@ const usersRouter = require("express").Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 
-usersRouter.get("/", (request, response, next) => {
-    User.find({})
-        .then((result) => {
-            return response.send(result);
-        })
-        .catch((err) => {
-            return response.status(500).json({ error: "Error getting data" });
-            next(err);
+usersRouter.get("/", async (request, response, next) => {
+    try {
+        const users = await User.find({}).populate("blogs", {
+            url: 1,
+            title: 1,
+            author: 1,
         });
+        response.json(users);
+    } catch (err) {
+        next(err);
+    }
 });
 
 usersRouter.post("/", async (request, response, next) => {
