@@ -27,7 +27,8 @@ const errorHandler = (error, request, response, next) => {
                     .status(400)
                     .json({ error: "expected `username` to be unique" });
             }
-
+        case "JsonWebTokenError":
+            return response.status(401).json({ error: "token Invalid" });
         default:
             logger.error(error.name);
     }
