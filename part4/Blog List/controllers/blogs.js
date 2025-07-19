@@ -11,6 +11,19 @@ blogsRouter.get("/", async (request, response) => {
     response.json(blogs);
 });
 
+blogsRouter.get("/:id", async (request, response, next) => {
+    try {
+        const blog = await Blog.findById(request.params.id);
+        if (blog) {
+            response.json(blog);
+        } else {
+            response.status(404).send({ error: "Blog not found" });
+        }
+    } catch (err) {
+        next(err);
+    }
+});
+
 blogsRouter.post("/", async (request, response, next) => {
     try {
         const body = request.body;
@@ -43,19 +56,38 @@ blogsRouter.post("/", async (request, response, next) => {
     }
 });
 
-blogsRouter.delete("/:id", async (request, response) => {
+blogsRouter.delete("/:id", async (request, response, next) => {
     const id = request.params.id;
+    const token = request.token;
+
+    let decodedToken;
     try {
-        const data = await Blog.deleteOne({ _id: id });
-        if (data.deletedCount === 1) {
-            response.status(204).end();
-        } else {
-            response.status(404).send({ message: "Resource not found" });
-        }
+        decodedToken = jwt.verify(token, process.env.SECRET);
     } catch (err) {
-        response.status(422).send({
-            message: err.message,
-        });
+        return response.status(401).json({ error: "token invalid or expired" });
+    }
+
+    if (!decodedToken.id) {
+        return response.status(401).json({ error: "token missing or invalid" });
+    }
+
+    try {
+        const blog = await Blog.findById(id);
+
+        if (!blog) {
+            return response.status(404).json({ error: "Blog not found" });
+        }
+
+        if (blog.user.toString() !== decodedToken.id) {
+            return response
+                .status(403)
+                .json({ error: "You are not authorized to delete this blog" });
+        }
+
+        await Blog.deleteOne({ _id: id });
+        response.status(204).end();
+    } catch (err) {
+        next(err);
     }
 });
 
