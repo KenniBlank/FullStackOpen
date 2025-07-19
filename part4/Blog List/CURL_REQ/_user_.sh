@@ -60,9 +60,9 @@ test_login() {
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $ACCESS_TOKEN" \
         -d '{
-            "title": "Death'\''s game",
+            "title": "Something",
             "author": "John Doe",
-            "url": "https://jkwjdkajw/",
-            "likes": 5
+            "url": "https://ewjkae132/",
+            "likes": 10
         }'
 }
