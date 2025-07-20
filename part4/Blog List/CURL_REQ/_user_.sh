@@ -70,7 +70,7 @@ test_login_and_blog_creation() {
 test_deletion_of_blog() {
     response=$(login)
     ACCESS_TOKEN=$(echo "$response" | jq -r ".token")
-    idOfBlogToBeDeleted="687ba9eb2b702b3c0699e944"
+    idOfBlogToBeDeleted="$1"
 
     # Send blog delete request
     curl -sS -X DELETE "$baseURL/api/blogs/${idOfBlogToBeDeleted}" \

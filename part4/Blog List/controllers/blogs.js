@@ -27,17 +27,12 @@ blogsRouter.get("/:id", async (request, response, next) => {
 blogsRouter.post("/", async (request, response, next) => {
     try {
         const body = request.body;
-        const token = request.token;
-        const decodedToken = jwt.verify(token, process.env.SECRET);
 
-        if (!decodedToken.id) {
-            return response.status(401).json({ error: "token invalid" });
-        }
-
-        const user = await User.findById(decodedToken.id);
+        const user = request.user;
         if (!user) {
             return response.status(400).json({ error: "Invalid user ID" });
         }
+
         const newBlog = new Blog({
             title: body.title,
             author: body.author,
@@ -58,16 +53,13 @@ blogsRouter.post("/", async (request, response, next) => {
 
 blogsRouter.delete("/:id", async (request, response, next) => {
     const id = request.params.id;
-    const token = request.token;
 
-    let decodedToken;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    } catch (err) {
+    if (!request.token) {
         return response.status(401).json({ error: "token invalid or expired" });
     }
 
-    if (!decodedToken.id) {
+    const user = request.user;
+    if (!user.id) {
         return response.status(401).json({ error: "token missing or invalid" });
     }
 
@@ -78,7 +70,7 @@ blogsRouter.delete("/:id", async (request, response, next) => {
             return response.status(404).json({ error: "Blog not found" });
         }
 
-        if (blog.user.toString() !== decodedToken.id) {
+        if (blog.user.toString() !== user.id) {
             return response
                 .status(403)
                 .json({ error: "You are not authorized to delete this blog" });
@@ -91,7 +83,7 @@ blogsRouter.delete("/:id", async (request, response, next) => {
     }
 });
 
-blogsRouter.put("/:id", async (request, response) => {
+blogsRouter.put("/:id", async (request, response, next) => {
     try {
         const blog = await Blog.findById(request.params.id);
         if (!blog) {
@@ -108,7 +100,7 @@ blogsRouter.put("/:id", async (request, response) => {
         const updatedBlog = await blog.save();
         response.json(updatedBlog);
     } catch (error) {
-        response.status(500).json({ error: error.message });
+        next(error);
     }
 });
 
