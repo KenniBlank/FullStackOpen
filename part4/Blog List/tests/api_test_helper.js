@@ -1,59 +1,95 @@
 const Blog = require("../models/blog");
+const User = require("../models/user");
+
+const initialUsersToBeCreated = [
+    {
+        username: "Hyouin Kyouma",
+        name: "Rintarou Okabe",
+        password: "El Psy Congroo",
+    },
+    {
+        username: "Christina",
+        name: "Makise Kurisu",
+        password: "Genius Girl",
+    },
+    {
+        username: "Daru",
+        name: "Itaru Hashida",
+        password: "Hacker",
+    },
+    {
+        username: "Okarin's Hostage",
+        name: "Mayuri Shiina",
+        password: "TuTuRu",
+    },
+    {
+        username: "Part-time Warrior",
+        name: "Suzuha Amane",
+        password: "My life has been a waste",
+    },
+];
 
 const initialBlogs = [
     {
-        _id: "5a422a851b54a676234d17f7",
-        title: "React patterns",
-        author: "Michael Chan",
-        url: "https://reactpatterns.com/",
-        likes: 7,
-        __v: 0,
+        title: "The Organization is Watching",
+        author: "Rintarou Okabe",
+        url: "https://futuregadgetlab.com/blog/organization-surveillance",
+        likes: 42,
     },
     {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
-        likes: 5,
-        __v: 0,
+        title: "Time Travel and Microwave Bananas",
+        author: "Makise Kurisu",
+        url: "https://amadeuslab.net/blog/time-travel-theory",
+        likes: 99,
     },
     {
-        _id: "5a422b3a1b54a676234d17f9",
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-        __v: 0,
+        title: "D-Mail Protocol Specification",
+        author: "Itaru Hashida",
+        url: "https://supahh4x0r.org/docs/dmail-protocol",
+        likes: 21,
     },
     {
-        _id: "5a422b891b54a676234d17fa",
-        title: "First class tests",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-        likes: 10,
-        __v: 0,
+        title: "The Tragedy of World Line Beta",
+        author: "Mayuri Shiina",
+        url: "https://tuturu.jp/articles/world-line-pain",
+        likes: 17,
     },
     {
-        _id: "5a422ba71b54a676234d17fb",
-        title: "TDD harms architecture",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-        likes: 0,
-        __v: 0,
+        title: "Reading Steiner Explained",
+        author: "Rintarou Okabe",
+        url: "https://okarinslab.org/reading-steiner",
+        likes: 56,
     },
     {
-        _id: "5a422bc61b54a676234d17fc",
-        title: "Type wars",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-        likes: 2,
-        __v: 0,
+        title: "Convergence Points and Inevitability",
+        author: "Suzuha Amane",
+        url: "https://2036resistance.org/convergence-points",
+        likes: 35,
     },
 ];
+
+const myMap = new Map();
+for (const user of initialUsersToBeCreated) {
+    myMap.set(user.name, {
+        username: user.username,
+        password: user.password,
+    });
+}
 
 const allBlogsInDB = async () => {
     const blogs = await Blog.find({});
     return blogs.map((blog) => blog.toJSON());
 };
 
-module.exports = { initialBlogs, allBlogsInDB };
+const allUsersInDB = async () => {
+    const users = await User.find({});
+    return users.map((blog) => blog.toJSON());
+};
+
+module.exports = {
+    initialUsersToBeCreated,
+    initialBlogs,
+    allBlogsInDB,
+    allUsersInDB,
+    myMap,
+};

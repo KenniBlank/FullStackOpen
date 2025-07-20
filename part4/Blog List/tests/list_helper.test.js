@@ -28,7 +28,7 @@ describe("total likes", () => {
     });
 
     test("when list has more than one blog, equals sum of likes of all blogs", () => {
-        assert.strictEqual(listHelper.totalLikes(blogs), 36);
+        assert.strictEqual(listHelper.totalLikes(blogs), 270);
     });
 });
 
@@ -45,7 +45,11 @@ describe("Favorite Blog", () => {
     });
 
     test("favorite blog, when multiple blogs", () => {
-        assert.deepStrictEqual(listHelper.favoriteBlog(blogs), blogs[2]);
+        const favBlog = listHelper.favoriteBlog(blogs);
+        assert.strictEqual(favBlog.author, blogs[1].author);
+        assert.strictEqual(favBlog.likes, blogs[1].likes);
+        assert.strictEqual(favBlog.title, blogs[1].title);
+        assert.strictEqual(favBlog.url, blogs[1].url);
     });
 });
 
@@ -66,8 +70,8 @@ describe("Most Blogs", () => {
 
     test("most blogs, when multiple blogs are passed", () => {
         assert.deepStrictEqual(listHelper.mostBlogs(blogs), {
-            author: "Robert C. Martin",
-            blogs: 3,
+            author: "Rintarou Okabe",
+            blogs: 2,
         });
     });
 });
@@ -89,8 +93,8 @@ describe("Most Likes", () => {
 
     test("most likes, when multiple blogs passed", () => {
         assert.deepStrictEqual(listHelper.mostLikes(blogs), {
-            author: "Edsger W. Dijkstra",
-            likes: 17,
+            author: "Makise Kurisu",
+            likes: 99,
         });
     });
 });

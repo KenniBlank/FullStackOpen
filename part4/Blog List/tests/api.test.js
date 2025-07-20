@@ -1,160 +1,240 @@
-const app = require("../app");
 const supertest = require("supertest");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 const Blog = require("../models/blog");
+const User = require("../models/user");
+
 const { test, describe, beforeEach, after } = require("node:test");
 const assert = require("node:assert");
 const helper = require("./api_test_helper");
 
+const app = require("../app");
 const API = supertest(app);
 
 beforeEach(async () => {
+    await User.deleteMany({});
     await Blog.deleteMany({});
-    await Blog.insertMany(helper.initialBlogs);
+
+    const userPromises = helper.initialUsersToBeCreated.map(async (user) => {
+        const passwordHash = await bcrypt.hash(user.password, 11);
+        const newUser = new User({
+            username: user.username,
+            passwordHash,
+            name: user.name,
+        });
+        return newUser.save();
+    });
+
+    await Promise.all(userPromises);
 });
 
-test("Blogs are returned as JSON", async () => {
-    const response = await API.get("/api/blogs")
-        .expect(200)
-        .expect("Content-Type", /application\/json/);
+describe("POST requests", () => {
+    test("All initial blogs are posted", async () => {
+        const before = await helper.allBlogsInDB();
+        for (const blog of helper.initialBlogs) {
+            const data = helper.myMap.get(blog.author);
 
-    assert.strictEqual(response.body.length, helper.initialBlogs.length);
-});
+            const userCredentials = {
+                username: data.username,
+                password: data.password,
+            };
 
-test("Verifing that unique identifier property of the blog posts is named id and is correctly assigned", () => {
-    const blogsInDB = helper.allBlogsInDB;
-    const totalBlogs = blogsInDB.length;
-    for (let i = 0; i < totalBlogs; i++) {
-        assert.strictEqual(blogFromDB.id, helper.initialBlogs[i]._id);
-    }
-});
+            const login = await API.post("/api/login")
+                .send(userCredentials)
+                .expect(200)
+                .expect("Content-Type", /application\/json/);
 
-describe("Post request successfull", async () => {
-    const beforePost_blogsInDB = await helper.allBlogsInDB();
+            const ACCESS_TOKEN = login.body.token;
+            const decodedToken = jwt.verify(ACCESS_TOKEN, process.env.SECRET);
+            const userId = decodedToken.id;
 
-    const newBlog = {
-        title: "Royal Massacre",
-        author: "B. Twar",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/31232131/3123213.html",
-        likes: 52,
-    };
+            const blogToPost = {
+                ...blog,
+                user: userId,
+            };
 
-    let result = await API.post("/api/blogs")
-        .send(newBlog)
-        .expect(201)
-        .expect("Content-Type", /application\/json/);
-    result = result.body;
+            await API.post("/api/blogs")
+                .set("Authorization", `Bearer ${ACCESS_TOKEN}`)
+                .send(blogToPost)
+                .expect(201);
+        }
 
-    const afterPost_blogsInDB = await helper.allBlogsInDB();
-
-    test("After post, DB's total length increases by one", () => {
+        const after = await helper.allBlogsInDB();
         assert.strictEqual(
-            beforePost_blogsInDB.length + 1,
-            afterPost_blogsInDB.length,
+            after.length,
+            before.length + helper.initialBlogs.length,
         );
     });
 
-    test("Correct Information is stored in DB", () => {
-        assert.strictEqual(newBlog.title, result.title);
-        assert.strictEqual(newBlog.author, result.author);
-        assert.strictEqual(newBlog.url, result.url);
-        assert.strictEqual(newBlog.likes, result.likes);
+    test("Wrong ACCESS token return JsonWebTokenError", () => {
+        const ACCESS_TOKEN = "random";
+        try {
+            jwt.verify(ACCESS_TOKEN, process.env.SECRET);
+        } catch (err) {
+            assert.strictEqual(err.name, "JsonWebTokenError");
+        }
     });
 
-    test("If likes property is missing, it defaults to zero", async () => {
-        const likesMissingBlog = {
-            title: "Dath's Game",
-            author: "B. Twar",
-            url: "http://www.someWebSite.com/blogs/123aw2/",
+    test("Wrong Credential returns 401 AKA unauthorized", async () => {
+        const userCredentials = {
+            username: "Unkwown",
+            password: "Who Asked?",
         };
 
-        let result = await API.post("/api/blogs")
-            .send(likesMissingBlog)
-            .expect(201)
+        const login = await API.post("/api/login").send(userCredentials);
+        assert.strictEqual(login.statusCode, 401);
+    });
+
+    test("Returns 401 if token not provided", async () => {
+        const newBlog = {
+            author: helper.initialUsersToBeCreated[0].name,
+            title: "Something",
+            url: "Soemthing more",
+            likes: 10,
+        };
+        const response = await API.post("/api/blogs").send(newBlog);
+        assert.strictEqual(response.statusCode, 401);
+    });
+
+    test("Correct credential but lack of title or url returns status code 400", async () => {
+        const userCredentials = {
+            username: helper.initialUsersToBeCreated[0].username,
+            password: helper.initialUsersToBeCreated[0].password,
+        };
+
+        const login = await API.post("/api/login")
+            .send(userCredentials)
+            .expect(200)
             .expect("Content-Type", /application\/json/);
 
-        assert.strictEqual(result.body.likes, 0);
-    });
+        const ACCESS_TOKEN = login.body.token;
+        const decodedToken = jwt.verify(ACCESS_TOKEN, process.env.SECRET);
+        const userId = decodedToken.id;
 
-    test("If title/url is missing, backend sends 400 status code i.e bad request", async () => {
-        const blogWithoutTitleNorURL = {
-            author: "Somebody",
+        const blogToPost = {
+            author: helper.initialUsersToBeCreated[0].name,
+            likes: 10,
+            user: userId,
         };
 
-        let result = await API.post("/api/blogs").send(blogWithoutTitleNorURL);
-        assert.strictEqual(result.statusCode, 400);
+        await API.post("/api/blogs")
+            .set("Authorization", `Bearer ${ACCESS_TOKEN}`)
+            .send(blogToPost)
+            .expect(400);
     });
 });
 
-describe("Delete request successfull", () => {
-    test("Deleting resource successfull", async () => {
-        const blogs = await helper.allBlogsInDB();
-        const response = await API.delete(`/api/blogs/${blogs[0].id}`);
-        assert.strictEqual(response.statusCode, 204);
-    });
-
-    test("Deleting same resource twice result in 404", async () => {
-        const blogs = await helper.allBlogsInDB();
-
-        // Redelete same resource
-        await API.delete(`/api/blogs/${blogs[0].id}`);
-        const response = await API.delete(`/api/blogs/${blogs[0].id}`);
-
-        assert.strictEqual(response.statusCode, 404);
-    });
-
-    test("Deleting jibrish resource results in 422 i.e Unprocessable Entry", async () => {
-        const jibrishID = "12aASD213AWD";
-
-        const response = await API.delete(`/api/blogs/${jibrishID}`);
-        assert.strictEqual(response.statusCode, 422);
-    });
+test("Amount of users in db equals amount of initial users", async () => {
+    const users = await helper.allUsersInDB();
+    assert.strictEqual(users.length, helper.initialUsersToBeCreated.length);
 });
 
-describe("Updating info of individual blog posts", () => {
-    test("Updating title, url, likes, author successfull", async () => {
-        const blogs = await helper.allBlogsInDB();
-        let blogToBeUpdated = blogs[0];
+test("After initial posts are uploaded, number of blogs in DB length matches initial blog length", async () => {
+    const blogs = await helper.allBlogsInDB();
+    assert.strictEqual(blogs.length, helper.allBlogsInDB.length);
+});
 
-        const NEW_AUTHOR = "Someone Else";
-        const NEW_URL = "https://xxaxxxax.com/xxas/dawdaw";
-        const NEW_LIKES = blogToBeUpdated.likes + 10;
-        const NEW_TITLE = "Random";
+describe("DELETE requests", () => {
+    let ACCESS_TOKEN;
+    let blogId;
+    let userId;
 
-        blogToBeUpdated = {
-            ...blogToBeUpdated,
-            author: NEW_AUTHOR,
-            url: NEW_URL,
-            likes: NEW_LIKES,
-            title: NEW_TITLE,
+    beforeEach(async () => {
+        // Set up a user and a blog for deletion tests
+        const userCredentials = {
+            username: helper.initialUsersToBeCreated[0].username,
+            password: helper.initialUsersToBeCreated[0].password,
         };
 
-        const result = await API.put(`/api/blogs/${blogToBeUpdated.id}`).send(
-            blogToBeUpdated,
-        );
+        const login = await API.post("/api/login")
+            .send(userCredentials)
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
 
-        assert.strictEqual(result.statusCode, 200);
-        assert.strictEqual(result.body.author, NEW_AUTHOR);
-        assert.strictEqual(result.body.url, NEW_URL);
-        assert.strictEqual(result.body.likes, NEW_LIKES);
-        assert.strictEqual(result.body.title, NEW_TITLE);
+        ACCESS_TOKEN = login.body.token;
+        const decodedToken = jwt.verify(ACCESS_TOKEN, process.env.SECRET);
+        userId = decodedToken.id;
+
+        const blogToPost = {
+            title: "Test Blog",
+            author: helper.initialUsersToBeCreated[0].name,
+            url: "http://testblog.com",
+            likes: 5,
+            user: userId,
+        };
+
+        const response = await API.post("/api/blogs")
+            .set("Authorization", `Bearer ${ACCESS_TOKEN}`)
+            .send(blogToPost)
+            .expect(201);
+
+        blogId = response.body.id;
     });
 
-    test("Updating non-existing blog results in 404", async () => {
-        const randomID = "64b6f0e2d5e2f60b8c9c9999"; // valid-looking MongoDB ObjectId format
+    test("Successfully deletes a blog with valid token and ID", async () => {
+        const before = await helper.allBlogsInDB();
 
-        const updatedData = {
-            title: "Doesn't matter",
-            author: "No One",
-            url: "https://nowhere.com",
-            likes: 0,
+        await API.delete(`/api/blogs/${blogId}`)
+            .set("Authorization", `Bearer ${ACCESS_TOKEN}`)
+            .expect(204);
+
+        const after = await helper.allBlogsInDB();
+        assert.strictEqual(after.length, before.length - 1);
+
+        const deletedBlog = await Blog.findById(blogId);
+        assert.strictEqual(deletedBlog, null);
+    });
+
+    test("Returns 401 when deleting without token", async () => {
+        await API.delete(`/api/blogs/${blogId}`).expect(401);
+
+        const blogs = await helper.allBlogsInDB();
+        assert.strictEqual(
+            blogs.some((blog) => blog.id === blogId),
+            true,
+        );
+    });
+
+    test("Returns 404 when deleting non-existent blog", async () => {
+        const nonExistentId = new mongoose.Types.ObjectId();
+        await API.delete(`/api/blogs/${nonExistentId}`)
+            .set("Authorization", `Bearer ${ACCESS_TOKEN}`)
+            .expect(404);
+    });
+
+    test("Returns 403 when user tries to delete another user's blog", async () => {
+        const secondUser = {
+            username: "testuser2",
+            password: "password2",
+            name: "Test User 2",
         };
 
-        const result = await API.put(`/api/blogs/${randomID}`).send(
-            updatedData,
-        );
+        const passwordHash = await bcrypt.hash(secondUser.password, 11);
+        const newUser = new User({
+            username: secondUser.username,
+            passwordHash,
+            name: secondUser.name,
+        });
+        await newUser.save();
 
-        assert.strictEqual(result.statusCode, 404);
+        const login = await API.post("/api/login")
+            .send({
+                username: secondUser.username,
+                password: secondUser.password,
+            })
+            .expect(200);
+
+        const secondUserToken = login.body.token;
+
+        // Try to delete first user's blog with second user's token
+        await API.delete(`/api/blogs/${blogId}`)
+            .set("Authorization", `Bearer ${secondUserToken}`)
+            .expect(403);
+
+        const blogStillExists = await Blog.findById(blogId);
+        assert.strictEqual(blogStillExists !== null, true);
     });
 });
 

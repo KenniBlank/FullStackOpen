@@ -27,10 +27,9 @@ blogsRouter.get("/:id", async (request, response, next) => {
 blogsRouter.post("/", async (request, response, next) => {
     try {
         const body = request.body;
-
         const user = request.user;
         if (!user) {
-            return response.status(400).json({ error: "Invalid user ID" });
+            return response.status(401).json({ error: "Invalid user ID" });
         }
 
         const newBlog = new Blog({
