@@ -1,7 +1,5 @@
 const Blog = require("../models/blog");
-const User = require("../models/user");
 const blogsRouter = require("express").Router();
-const jwt = require("jsonwebtoken");
 
 blogsRouter.get("/", async (request, response) => {
     const blogs = await Blog.find({}).populate("user", {
@@ -28,6 +26,9 @@ blogsRouter.post("/", async (request, response, next) => {
     try {
         const body = request.body;
         const user = request.user;
+
+        console.log(user);
+
         if (!user) {
             return response.status(401).json({ error: "Invalid user ID" });
         }

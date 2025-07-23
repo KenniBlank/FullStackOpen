@@ -33,6 +33,60 @@ const LoginForm = ({
     );
 };
 
+const CreateBlog = () => {
+    const [title, setTitle] = useState("");
+    const [author, setAuthor] = useState("");
+    const [url, setUrl] = useState("");
+
+    const createBlog = (event) => {
+        event.preventDefault();
+
+        const obj = {
+            title: title,
+            author: author,
+            url: url,
+        };
+
+        blogService.createBlog(obj);
+    };
+
+    return (
+        <form onSubmit={createBlog}>
+            title:{" "}
+            <input
+                type="text"
+                placeholder="title"
+                value={title}
+                onChange={({ target }) => {
+                    setTitle(target.value);
+                }}
+            />
+            <br />
+            author:{" "}
+            <input
+                type="text"
+                placeholder="author"
+                value={author}
+                onChange={({ target }) => {
+                    setAuthor(target.value);
+                }}
+            />
+            <br />
+            url:{" "}
+            <input
+                type="text"
+                placeholder="http://......."
+                value={url}
+                onChange={({ target }) => {
+                    setUrl(target.value);
+                }}
+            />
+            <br />
+            <button type="submit">Create</button>
+        </form>
+    );
+};
+
 const App = () => {
     const [blogs, setBlogs] = useState([]);
 
@@ -45,7 +99,9 @@ const App = () => {
     }, []);
 
     useEffect(() => {
-        setUser(JSON.parse(window.localStorage.getItem("user")));
+        const token = JSON.parse(window.localStorage.getItem("user"));
+        setUser(token);
+        blogService.setToken(token);
     }, []);
 
     const handleLogin = async (event) => {
@@ -60,6 +116,7 @@ const App = () => {
             });
             console.log(response);
             setUser(response);
+            blogService.setToken(response);
             window.localStorage.setItem("user", JSON.stringify(response));
         } catch (err) {
             console.log("Invalid: ", err.message);
@@ -80,6 +137,7 @@ const App = () => {
                     >
                         Log Out
                     </button>
+                    <CreateBlog />
                 </>
             ) : (
                 <LoginForm
