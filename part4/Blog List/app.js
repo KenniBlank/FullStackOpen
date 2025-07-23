@@ -1,4 +1,5 @@
 const express = require("express");
+var cors = require("cors");
 const mongoose = require("mongoose");
 
 const config = require("./utils/config");
@@ -14,6 +15,7 @@ mongoose
     .catch((err) => logger.error("Error connecting to mongoDB: ", err.message));
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(middleware.requestLogger);
 

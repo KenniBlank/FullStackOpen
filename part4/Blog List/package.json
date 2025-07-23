@@ -21,6 +21,7 @@
         "mongoose": "^8.16.1"
     },
     "devDependencies": {
+        "cors": "^2.8.5",
         "supertest": "^7.1.1"
     }
 }
