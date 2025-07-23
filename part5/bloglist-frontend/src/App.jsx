@@ -8,25 +8,8 @@ const LoginForm = ({
     password,
     setUsername,
     setPassword,
-    setUser,
+    handleLogin,
 }) => {
-    const handleLogin = async (event) => {
-        event.preventDefault();
-
-        try {
-            setUsername("");
-            setPassword("");
-            const response = await loginService.login({
-                username: username,
-                password: password,
-            });
-            console.log(response);
-            setUser(response);
-        } catch (err) {
-            console.log("Invalid: ", err.message);
-        }
-    };
-
     return (
         <form onSubmit={handleLogin}>
             Username:{" "}
@@ -61,12 +44,42 @@ const App = () => {
         blogService.getAll().then((blogs) => setBlogs(blogs));
     }, []);
 
+    useEffect(() => {
+        setUser(JSON.parse(window.localStorage.getItem("user")));
+    }, []);
+
+    const handleLogin = async (event) => {
+        event.preventDefault();
+
+        try {
+            setUsername("");
+            setPassword("");
+            const response = await loginService.login({
+                username: username,
+                password: password,
+            });
+            console.log(response);
+            setUser(response);
+            window.localStorage.setItem("user", JSON.stringify(response));
+        } catch (err) {
+            console.log("Invalid: ", err.message);
+        }
+    };
+
     return (
         <div>
             <h2>blogs</h2>
             {user ? (
                 <>
-                    <p>{user.name} logged in</p>
+                    {user.name} logged in{" "}
+                    <button
+                        onClick={() => {
+                            setUser(null);
+                            window.localStorage.removeItem("user");
+                        }}
+                    >
+                        Log Out
+                    </button>
                 </>
             ) : (
                 <LoginForm
@@ -74,7 +87,7 @@ const App = () => {
                     password={password}
                     setUsername={setUsername}
                     setPassword={setPassword}
-                    setUser={setUser}
+                    handleLogin={handleLogin}
                 />
             )}
             {blogs.map((blog) => (
