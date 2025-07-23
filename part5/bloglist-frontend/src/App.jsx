@@ -33,21 +33,34 @@ const LoginForm = ({
     );
 };
 
-const CreateBlog = () => {
+const CreateBlog = ({ setNotification }) => {
     const [title, setTitle] = useState("");
     const [author, setAuthor] = useState("");
     const [url, setUrl] = useState("");
 
-    const createBlog = (event) => {
+    const createBlog = async (event) => {
         event.preventDefault();
 
-        const obj = {
-            title: title,
-            author: author,
-            url: url,
-        };
+        try {
+            const obj = {
+                title: title,
+                author: author,
+                url: url,
+            };
 
-        blogService.createBlog(obj);
+            const response = await blogService.createBlog(obj);
+            console.log(response);
+
+            setNotification({
+                className: "msg",
+                message: `a new blog ${response.title} by ${response.author} added`,
+            });
+        } catch (err) {
+            setNotification({
+                className: "err",
+                message: `Error creating new blog\nError: ${err.message}`,
+            });
+        }
     };
 
     return (
@@ -87,12 +100,29 @@ const CreateBlog = () => {
     );
 };
 
+const Notification = ({ notification, setNotification }) => {
+    if (!(notification.message && notification.className)) return null;
+    setTimeout(() => {
+        setNotification({
+            className: "",
+            message: "",
+        });
+    }, 5000);
+
+    return <div className={notification.className}>{notification.message}</div>;
+};
+
 const App = () => {
     const [blogs, setBlogs] = useState([]);
 
     const [username, setUsername] = useState("john_doe");
     const [password, setPassword] = useState("secure123");
     const [user, setUser] = useState(null);
+
+    const [notification, setNotification] = useState({
+        className: "", // either err or msg
+        message: "",
+    });
 
     useEffect(() => {
         blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -114,18 +144,31 @@ const App = () => {
                 username: username,
                 password: password,
             });
-            console.log(response);
             setUser(response);
             blogService.setToken(response);
             window.localStorage.setItem("user", JSON.stringify(response));
+
+            setNotification({
+                className: "msg",
+                message: "Logged In Successfully",
+            });
         } catch (err) {
-            console.log("Invalid: ", err.message);
+            setNotification({
+                className: "err",
+                message: `Invalid username or password.\n Error: ${err.message}`,
+            });
         }
     };
 
     return (
         <div>
             <h2>blogs</h2>
+            {notification && (
+                <Notification
+                    notification={notification}
+                    setNotification={setNotification}
+                />
+            )}
             {user ? (
                 <>
                     {user.name} logged in{" "}
@@ -133,11 +176,16 @@ const App = () => {
                         onClick={() => {
                             setUser(null);
                             window.localStorage.removeItem("user");
+
+                            setNotification({
+                                className: "msg",
+                                message: "Logged Out Successfully",
+                            });
                         }}
                     >
                         Log Out
                     </button>
-                    <CreateBlog />
+                    <CreateBlog setNotification={setNotification} />
                 </>
             ) : (
                 <LoginForm
