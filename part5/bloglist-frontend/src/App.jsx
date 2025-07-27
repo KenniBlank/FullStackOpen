@@ -116,6 +116,7 @@ const App = () => {
                                 className: "msg",
                                 message: "Logged Out Successfully",
                             });
+                            blogService.setToken(null);
                         }}
                     >
                         Log Out
