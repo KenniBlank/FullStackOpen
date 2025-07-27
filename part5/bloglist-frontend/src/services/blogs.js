@@ -11,15 +11,36 @@ const getAll = async () => {
     return request.data;
 };
 
-const createBlog = async (newBlog) => {
-    const config = {
+const returnConfig = () => {
+    return {
         headers: {
             Authorization: `Bearer ${token.token}`,
         },
     };
+};
 
+const createBlog = async (newBlog) => {
+    const config = returnConfig();
     const response = await axios.post(baseUrl, newBlog, config);
     return response.data;
 };
 
-export default { getAll, createBlog, setToken };
+const updateBlog = async (updateBlogInfo) => {
+    const { id } = updateBlogInfo;
+    if (!id) return "err";
+
+    const response = await axios.put(
+        `${baseUrl}/${id}`,
+        updateBlogInfo,
+        returnConfig(),
+    );
+    return response.data;
+};
+
+const deleteBlog = async (id) => {
+    const response = await axios.delete(`${baseUrl}/${id}`, returnConfig());
+    console.log(response);
+    return response;
+};
+
+export default { getAll, createBlog, updateBlog, deleteBlog, setToken };

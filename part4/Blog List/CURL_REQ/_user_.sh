@@ -77,3 +77,15 @@ test_deletion_of_blog() {
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $ACCESS_TOKEN"
 }
+
+test_backend_put_req() {
+    response=$(login)
+    ACCESS_TOKEN=$(echo "$response" | jq -r ".token")
+    idOfBlogToBeUpdated="$1"
+
+    # Send blog put request to set likes to 10
+    curl -X PUT "$baseURL/api/blogs/${idOfBlogToBeUpdated}" \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"likes": 10}'
+}

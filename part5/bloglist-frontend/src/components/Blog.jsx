@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, updateLikes, removeBlog }) => {
     const blogStyle = {
         paddingTop: 10,
         paddingLeft: 2,
@@ -15,8 +15,6 @@ const Blog = ({ blog }) => {
         setView(!view);
     };
 
-    console.log(blog);
-
     return (
         <div style={blogStyle}>
             {blog.title} {blog.author}{" "}
@@ -26,9 +24,27 @@ const Blog = ({ blog }) => {
                     <br />
                     {blog.url}
                     <br />
-                    likes: {blog.likes} <button>like</button>
+                    likes: {blog.likes}{" "}
+                    <button
+                        onClick={() => {
+                            updateLikes(blog.id, blog.likes);
+                        }}
+                    >
+                        like
+                    </button>
                     <br />
                     {blog.user.name}
+                    <br />
+                    <button
+                        onClick={() =>
+                            removeBlog(
+                                blog.id,
+                                `Remove blog ${blog.title} by ${blog.author}`,
+                            )
+                        }
+                    >
+                        Remove
+                    </button>
                 </>
             ) : (
                 <></>

@@ -60,6 +60,41 @@ const App = () => {
 
     const createBlogRef = useRef(null);
 
+    const updateLikes = async (
+        id,
+        initialLikes,
+        amountOfLikesToUpdateBy = 1,
+    ) => {
+        const data = {
+            id,
+            likes: initialLikes + amountOfLikesToUpdateBy,
+        };
+        const response = await blogService.updateBlog(data);
+
+        setBlogs(
+            blogs.map((blog) =>
+                blog.id === response.id
+                    ? { ...blog, likes: response.likes }
+                    : blog,
+            ),
+        );
+    };
+
+    const removeBlog = async (id, msg) => {
+        if (window.confirm(msg)) {
+            try {
+                const response = await blogService.deleteBlog(id);
+                if (response.status === 204)
+                    setBlogs(blogs.filter((blog) => blog.id !== id));
+            } catch (err) {
+                setNotification({
+                    className: "err",
+                    message: err.message ? err.message : "Error removing blog",
+                });
+            }
+        }
+    };
+
     return (
         <div>
             <h2>blogs</h2>
@@ -105,9 +140,16 @@ const App = () => {
                     handleLogin={handleLogin}
                 />
             )}
-            {blogs.map((blog) => (
-                <Blog key={blog.id} blog={blog} />
-            ))}
+            {[...blogs]
+                .sort((a, b) => b.likes - a.likes)
+                .map((blog) => (
+                    <Blog
+                        key={blog.id}
+                        blog={blog}
+                        updateLikes={updateLikes}
+                        removeBlog={removeBlog}
+                    />
+                ))}
         </div>
     );
 };

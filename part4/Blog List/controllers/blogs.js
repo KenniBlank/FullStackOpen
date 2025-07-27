@@ -95,7 +95,7 @@ blogsRouter.put("/:id", async (request, response, next) => {
         if (title) blog.title = title;
         if (author) blog.author = author;
         if (url) blog.url = url;
-        if (likes !== undefined) blog.likes = likes;
+        if (likes) blog.likes = likes;
 
         const updatedBlog = await blog.save();
         response.json(updatedBlog);
