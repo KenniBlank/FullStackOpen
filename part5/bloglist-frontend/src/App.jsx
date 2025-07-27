@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
+
 import Blog from "./components/Blog";
+import Togglable from "./components/Togglable";
+
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import { useRef } from "react";
 
 const LoginForm = ({
     username,
@@ -33,7 +37,7 @@ const LoginForm = ({
     );
 };
 
-const CreateBlog = ({ setNotification }) => {
+const CreateBlog = ({ setNotification, blogs, setBlogs, onClick }) => {
     const [title, setTitle] = useState("");
     const [author, setAuthor] = useState("");
     const [url, setUrl] = useState("");
@@ -49,6 +53,7 @@ const CreateBlog = ({ setNotification }) => {
             };
 
             const response = await blogService.createBlog(obj);
+            setBlogs(blogs.concat(response));
             console.log(response);
 
             setNotification({
@@ -95,7 +100,9 @@ const CreateBlog = ({ setNotification }) => {
                 }}
             />
             <br />
-            <button type="submit">Create</button>
+            <button type="submit" onClick={onClick}>
+                Create
+            </button>
         </form>
     );
 };
@@ -160,6 +167,8 @@ const App = () => {
         }
     };
 
+    const createBlogRef = useRef(null);
+
     return (
         <div>
             <h2>blogs</h2>
@@ -185,7 +194,16 @@ const App = () => {
                     >
                         Log Out
                     </button>
-                    <CreateBlog setNotification={setNotification} />
+                    <Togglable buttonLabel="New Blog" ref={createBlogRef}>
+                        <CreateBlog
+                            setNotification={setNotification}
+                            blogs={blogs}
+                            setBlogs={setBlogs}
+                            onClick={() => {
+                                createBlogRef.current.toggleVisibility();
+                            }}
+                        />
+                    </Togglable>
                 </>
             ) : (
                 <LoginForm
