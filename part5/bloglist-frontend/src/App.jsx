@@ -1,123 +1,14 @@
 import { useState, useEffect } from "react";
 
-import Blog from "./components/Blog";
+import Notification from "./components/Notification";
+import CreateBlog from "./components/CreateBlog";
+import LoginForm from "./components/LoginForm";
 import Togglable from "./components/Togglable";
+import Blog from "./components/Blog";
 
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import { useRef } from "react";
-
-const LoginForm = ({
-    username,
-    password,
-    setUsername,
-    setPassword,
-    handleLogin,
-}) => {
-    return (
-        <form onSubmit={handleLogin}>
-            Username:{" "}
-            <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={({ target }) => setUsername(target.value)}
-            />
-            <br />
-            Password:{" "}
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={({ target }) => setPassword(target.value)}
-            />
-            <br />
-            <button type="submit">Submit</button>
-        </form>
-    );
-};
-
-const CreateBlog = ({ setNotification, blogs, setBlogs, onClick }) => {
-    const [title, setTitle] = useState("");
-    const [author, setAuthor] = useState("");
-    const [url, setUrl] = useState("");
-
-    const createBlog = async (event) => {
-        event.preventDefault();
-
-        try {
-            const obj = {
-                title: title,
-                author: author,
-                url: url,
-            };
-
-            const response = await blogService.createBlog(obj);
-            setBlogs(blogs.concat(response));
-            console.log(response);
-
-            setNotification({
-                className: "msg",
-                message: `a new blog ${response.title} by ${response.author} added`,
-            });
-        } catch (err) {
-            setNotification({
-                className: "err",
-                message: `Error creating new blog\nError: ${err.message}`,
-            });
-        }
-    };
-
-    return (
-        <form onSubmit={createBlog}>
-            title:{" "}
-            <input
-                type="text"
-                placeholder="title"
-                value={title}
-                onChange={({ target }) => {
-                    setTitle(target.value);
-                }}
-            />
-            <br />
-            author:{" "}
-            <input
-                type="text"
-                placeholder="author"
-                value={author}
-                onChange={({ target }) => {
-                    setAuthor(target.value);
-                }}
-            />
-            <br />
-            url:{" "}
-            <input
-                type="text"
-                placeholder="http://......."
-                value={url}
-                onChange={({ target }) => {
-                    setUrl(target.value);
-                }}
-            />
-            <br />
-            <button type="submit" onClick={onClick}>
-                Create
-            </button>
-        </form>
-    );
-};
-
-const Notification = ({ notification, setNotification }) => {
-    if (!(notification.message && notification.className)) return null;
-    setTimeout(() => {
-        setNotification({
-            className: "",
-            message: "",
-        });
-    }, 5000);
-
-    return <div className={notification.className}>{notification.message}</div>;
-};
 
 const App = () => {
     const [blogs, setBlogs] = useState([]);
